@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import BrainCanvas from './BrainCanvas.jsx';
+import SurveySection from './SurveySection.jsx';
 import { REGIONS, HEROES, WELLBEING, IOT_SOLUTIONS, BUILDER_PROJECTS } from './data.js';
 import { REGIONS_KO, HEROES_KO, WELLBEING_KO, IOT_SOLUTIONS_KO, BUILDER_PROJECTS_KO } from './data.ko.js';
 import { useLang, T } from './i18n.js';
@@ -37,6 +38,7 @@ export default function App() {
     { id:'builder', label: t.nav.builder },
     { id:'resources', label: t.nav.resources },
     { id:'community', label: t.nav.community },
+    { id:'survey', label: t.nav.survey },
   ];
 
   useEffect(() => {
@@ -471,6 +473,9 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* ── SURVEY ── */}
+        {section === 'survey' && <SurveySection t={t.survey} />}
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '24px', textAlign: 'center' }}>
           <p style={{ fontSize: 12, color: '#2A3A4A', margin: 0 }}>{t.footer}</p>

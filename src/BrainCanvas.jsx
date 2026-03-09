@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -14,6 +15,7 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
     dnPos: null, prevPos: null, hoveredId: null
   });
   const meshMapRef = useRef({});
+  const highlightLightRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -35,71 +37,86 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mount.appendChild(renderer.domElement);
 
-    // Lighting — 4-light photographic rig
-    scene.add(new THREE.AmbientLight(0xffffff, 0.28));
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-    const key = new THREE.DirectionalLight(0xfff4e8, 1.4);
+    const key = new THREE.DirectionalLight(0xfff4e8, 1.2);
     key.position.set(4, 5, 6);
     key.castShadow = true;
-    key.shadow.mapSize.width = 1024;
-    key.shadow.mapSize.height = 1024;
     scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0x3355cc, 0.55);
+    const fill = new THREE.DirectionalLight(0x3355cc, 0.45);
     fill.position.set(-5, -2, -4);
     scene.add(fill);
 
-    // Rim light — separates brain from background, adds depth
-    const rim = new THREE.DirectionalLight(0xffffff, 0.7);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.6);
     rim.position.set(1, 2, -6);
     scene.add(rim);
 
-    // Inner point light — simulates subsurface tissue translucency
-    const inner = new THREE.PointLight(0xff9966, 0.45, 4.5);
-    inner.position.set(0, 0, 0);
-    scene.add(inner);
+    const under = new THREE.DirectionalLight(0xffe8d0, 0.2);
+    under.position.set(0, -4, 2);
+    scene.add(under);
 
-    // Brain shell — dura mater: slight clearcoat gloss, wet membrane
-    const shell = new THREE.Mesh(
-      new THREE.SphereGeometry(1.68, 48, 48),
-      new THREE.MeshPhysicalMaterial({
-        color: 0x1a3060,
-        transparent: true,
-        opacity: 0.11,
-        side: THREE.BackSide,
-        depthWrite: false,
-        roughness: 0.15,
-        metalness: 0.05,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.2,
-      })
-    );
-    shell.scale.set(1.0, 0.88, 1.12);
-    scene.add(shell);
+    // Highlight point light for region selection glow
+    const highlightLight = new THREE.PointLight(0xffffff, 0, 3.5);
+    scene.add(highlightLight);
+    highlightLightRef.current = highlightLight;
 
     const group = new THREE.Group();
-    const allMeshes = [], meshMap = {};
+    scene.add(group);
 
+    let disposed = false;
+
+    // Load OBJ brain model
+    const texture = new THREE.TextureLoader().load('/brain.jpg');
+    const brainMat = new THREE.MeshPhongMaterial({
+      map: texture,
+      specular: new THREE.Color(0x222222),
+      shininess: 18,
+    });
+
+    const loader = new OBJLoader();
+    loader.load('/brain.obj', (obj) => {
+      if (disposed) return;
+      // Center and scale the model
+      const box = new THREE.Box3().setFromObject(obj);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 3.2 / maxDim;
+
+      obj.position.sub(center.multiplyScalar(scale));
+      obj.scale.setScalar(scale);
+
+      obj.traverse(child => {
+        if (child.isMesh) {
+          child.material = brainMat;
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      group.add(obj);
+    });
+
+    // Invisible region spheres for raycasting only
+    const allMeshes = [], meshMap = {};
     REGIONS.forEach(reg => {
       const add = (x, y, z) => {
         const mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(reg.r, 48, 48),
-          new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color(reg.color),
-            roughness: 0.60,
-            metalness: 0.0,
-            clearcoat: 0.22,
-            clearcoatRoughness: 0.35,
+          new THREE.SphereGeometry(reg.r, 12, 12),
+          new THREE.MeshBasicMaterial({
             transparent: true,
-            opacity: 0.92,
+            opacity: 0.001,
+            depthWrite: false,
+            colorWrite: false,
           })
         );
         mesh.position.set(x, y, z);
         mesh.scale.set(...reg.scl);
         mesh.userData.regionId = reg.id;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        group.add(mesh); allMeshes.push(mesh);
+        group.add(mesh);
+        allMeshes.push(mesh);
         if (!meshMap[reg.id]) meshMap[reg.id] = [];
         meshMap[reg.id].push(mesh);
       };
@@ -107,13 +124,12 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
       if (reg.id === 'temporal') add(-reg.pos[0], reg.pos[1], reg.pos[2]);
     });
 
-    scene.add(group);
     meshMapRef.current = meshMap;
 
     // Post-processing
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.38, 0.55, 0.72);
+    const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.18, 0.45, 0.85);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
 
@@ -183,12 +199,12 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
       if (st.autoRotate) st.rotY += 0.003;
       group.rotation.y = st.rotY;
       group.rotation.x = st.rotX;
-      shell.rotation.y = st.rotY * 0.4;
       composer.render();
     };
     animate();
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(raf);
       mount.removeEventListener('mousedown', mD);
       window.removeEventListener('mousemove', mM);
@@ -203,19 +219,23 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
   }, []);
 
   useEffect(() => {
-    const meshMap = meshMapRef.current;
-    REGIONS.forEach(reg => {
-      (meshMap[reg.id] || []).forEach(mesh => {
-        const isSel = selected === reg.id;
-        const isHov = hovered === reg.id;
-        const isDim = selected && !isSel;
-        mesh.material.color.set(isSel || isHov ? reg.bright : reg.color);
-        mesh.material.opacity = isDim ? 0.22 : 0.92;
-        mesh.material.emissive = mesh.material.emissive || new THREE.Color(0);
-        mesh.material.emissive.set(isSel ? reg.bright : isHov ? reg.bright : 0x000000);
-        mesh.material.emissive.multiplyScalar(isSel ? 0.28 : isHov ? 0.14 : 0);
-      });
-    });
+    const light = highlightLightRef.current;
+    if (!light) return;
+    if (selected) {
+      const reg = REGIONS.find(r => r.id === selected);
+      light.color.set(reg.bright);
+      light.intensity = 1.6;
+      light.position.set(...reg.pos);
+      light.distance = 2.8;
+    } else if (hovered) {
+      const reg = REGIONS.find(r => r.id === hovered);
+      light.color.set(reg.color);
+      light.intensity = 0.8;
+      light.position.set(...reg.pos);
+      light.distance = 2.5;
+    } else {
+      light.intensity = 0;
+    }
   }, [selected, hovered]);
 
   return (
