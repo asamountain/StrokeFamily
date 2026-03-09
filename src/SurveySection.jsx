@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 // 1. Go to formspree.io → sign up free → New Form → copy the endpoint URL
 // 2. Replace the string below with your endpoint, e.g. 'https://formspree.io/f/xpzvjkab'
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/REPLACE_ME';
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xeererlp';
 
 const serif = { fontFamily: "'Lora', Georgia, serif" };
 
