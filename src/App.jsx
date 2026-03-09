@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import BrainCanvas from './BrainCanvas.jsx';
 import SurveySection from './SurveySection.jsx';
-import { REGIONS, HEROES, WELLBEING, IOT_SOLUTIONS, BUILDER_PROJECTS } from './data.js';
-import { REGIONS_KO, HEROES_KO, WELLBEING_KO, IOT_SOLUTIONS_KO, BUILDER_PROJECTS_KO } from './data.ko.js';
+import { REGIONS, HEROES, WELLBEING } from './data.js';
+import { REGIONS_KO, HEROES_KO, WELLBEING_KO } from './data.ko.js';
 import { useLang, T } from './i18n.js';
 
 const serif = { fontFamily: "'Lora', Georgia, serif" };
@@ -18,15 +18,11 @@ export default function App() {
   const regions = lang === 'ko' ? REGIONS_KO : REGIONS;
   const heroes  = lang === 'ko' ? HEROES_KO  : HEROES;
   const wellbeing = lang === 'ko' ? WELLBEING_KO : WELLBEING;
-  const iotSolutions = lang === 'ko' ? IOT_SOLUTIONS_KO : IOT_SOLUTIONS;
-  const builderProjects = lang === 'ko' ? BUILDER_PROJECTS_KO : BUILDER_PROJECTS;
 
   const [section, setSection] = useState('home');
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
   const [expandedHero, setExpandedHero] = useState(null);
-  const [expandedIoT, setExpandedIoT] = useState(null);
-  const [expandedProject, setExpandedProject] = useState(null);
   const selectedData = regions.find(r => r.id === selected);
 
   const NAV = [
@@ -34,8 +30,7 @@ export default function App() {
     { id:'brain', label: t.nav.brain },
     { id:'heroes', label: t.nav.heroes },
     { id:'wellbeing', label: t.nav.wellbeing },
-    { id:'iot', label: t.nav.iot },
-    { id:'builder', label: t.nav.builder },
+    { id:'claude', label: t.nav.claude },
     { id:'resources', label: t.nav.resources },
     { id:'community', label: t.nav.community },
     { id:'survey', label: t.nav.survey },
@@ -107,7 +102,7 @@ export default function App() {
                   {t.home.sub}
                 </p>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {[[t.home.btnBrain, '#C4302B', 'brain'], [t.home.btnHeroes, '#5B8DD9', 'heroes'], [t.home.btnIot, '#5BBD8A', 'iot']].map(([l, c, s]) => (
+                  {[[t.home.btnBrain, '#C4302B', 'brain'], [t.home.btnHeroes, '#5B8DD9', 'heroes'], [t.home.btnClaude, '#C8934A', 'claude']].map(([l, c, s]) => (
                     <button key={s} onClick={() => go(s)} style={{
                       background: `${c}18`, border: `1px solid ${c}50`, color: c,
                       padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', fontWeight: 500
@@ -294,119 +289,170 @@ export default function App() {
           </div>
         )}
 
-        {/* ── IOT / SMART HOME ── */}
-        {section === 'iot' && (
-          <div style={{ maxWidth: 1060, margin: '0 auto', padding: '56px 24px 80px' }}>
-            <div style={{ marginBottom: 52 }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.22em', color: '#5BBD8A', textTransform: 'uppercase', marginBottom: 14 }}>{t.iot.tag}</div>
-              <h1 style={{ ...serif, fontSize: 'clamp(22px,4vw,42px)', fontWeight: 400, margin: '0 0 14px' }}>
-                {t.iot.h1} <em style={{ color: '#5BBD8A' }}>{t.iot.h2}</em>
-              </h1>
-              <p style={{ color: '#6A7A8A', lineHeight: 1.8, maxWidth: 600, fontSize: 15, fontWeight: 300 }}>{t.iot.sub}</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 14 }}>
-              {iotSolutions.map((s, i) => (
-                <div key={i} style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: `1px solid ${expandedIoT === i ? s.color + '50' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 14, padding: '22px 20px', cursor: 'pointer', transition: 'all 0.2s'
-                }} onClick={() => setExpandedIoT(expandedIoT === i ? null : i)}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                    <span style={{ fontSize: 26 }}>{s.icon}</span>
-                    {tag(s.difficulty, s.color)}
-                  </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 600, color: '#E0D8D0', margin: '0 0 8px' }}>{s.title}</h3>
-                  <p style={{ fontSize: 13, color: '#6A7A8A', lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
-                  {expandedIoT === i && (
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${s.color}30` }}>
-                      <div style={{ fontSize: 12, color: s.color, marginBottom: 8, fontWeight: 600 }}>{t.iot.familyImpact}</div>
-                      <p style={{ fontSize: 13, color: '#8A9AAA', lineHeight: 1.7, margin: '0 0 14px' }}>{s.impact}</p>
-                      <div style={{ fontSize: 11, color: '#3A4A5A', marginBottom: 6, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t.iot.hardwareNeeded}</div>
-                      {s.hardware.map(h => (
-                        <div key={h} style={{ fontSize: 12, color: '#5A6A7A', marginBottom: 4, display: 'flex', gap: 8 }}>
-                          <span style={{ color: s.color }}>·</span>{h}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: 48, padding: '24px 28px', background: 'rgba(196,48,43,0.07)', border: '1px solid rgba(196,48,43,0.2)', borderRadius: 14 }}>
-              <div style={{ fontSize: 11, color: '#C4302B', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>{t.iot.firstTag}</div>
-              <p style={{ fontSize: 15, color: '#B0A8A0', lineHeight: 1.75, margin: 0 }}
-                dangerouslySetInnerHTML={{ __html: t.iot.firstText }} />
-            </div>
-          </div>
-        )}
+        {/* ── AI COMPANION (CLAUDE) ── */}
+        {section === 'claude' && (() => {
+          const tc = t.claude;
+          const accent = '#C8934A';
+          const useCases = [
+            {
+              icon: '💔',
+              title: 'Immediate emotional relief',
+              prompt: '"I\'m so angry at my dad right now and I feel terrible about it. Can you help me understand why I feel this way?"',
+              why: 'Claude can validate, reframe, and give you language for what you\'re experiencing — at 2am when no one else is available.',
+              color: '#D96F8A',
+            },
+            {
+              icon: '📋',
+              title: 'Translating medical jargon',
+              prompt: '"His discharge papers say \'left MCA territory infarct with expressive aphasia.\' What does this actually mean for daily life?"',
+              why: 'Turn clinical language into plain understanding of what to expect and how to adapt.',
+              color: '#5B8DD9',
+            },
+            {
+              icon: '🩺',
+              title: 'Preparing for doctor appointments',
+              prompt: '"I have 15 minutes with his neurologist tomorrow. What are the 5 most important questions I should ask?"',
+              why: 'Arrive prepared. Use every minute of limited specialist time effectively.',
+              color: '#5BBD8A',
+            },
+            {
+              icon: '🗺️',
+              title: 'Navigating care systems',
+              prompt: '"I\'m in Milwaukee County, we have limited income, Dad had a stroke 3 months ago — what programs might we qualify for and how do I apply?"',
+              why: 'Claude can map the landscape of options specific to your location and situation.',
+              color: '#E8735A',
+            },
+            {
+              icon: '✉️',
+              title: 'Writing hard communications',
+              prompt: '"Help me write a message to my siblings explaining why I need them to take shifts. I\'m scared they\'ll say no."',
+              why: 'Get the words right when the stakes are high and emotions make it hard to think clearly.',
+              color: '#9B6FD9',
+            },
+            {
+              icon: '⚡',
+              title: 'Behavior decoding in the moment',
+              prompt: '"He just screamed at my mom for no reason. She\'s crying. What\'s happening neurologically and what do I say to her right now?"',
+              why: 'Understand the brain science behind sudden behaviors so you can respond instead of react.',
+              color: '#D9A84E',
+            },
+            {
+              icon: '🌧️',
+              title: 'Processing grief',
+              prompt: '"I keep thinking about who he was before. I miss him even though he\'s still here. Is this normal?"',
+              why: 'Ambiguous grief — mourning someone who is still alive — is one of the loneliest parts of caregiving. Claude won\'t minimize it.',
+              color: '#7A9DD9',
+            },
+            {
+              icon: '🔄',
+              title: 'Building adaptive routines',
+              prompt: '"He resists bathing every morning. Can you help me design a routine that works around his frontal lobe damage?"',
+              why: 'Move from power struggles to neuroscience-informed strategies that actually work.',
+              color: '#5BBD8A',
+            },
+          ];
+          const patterns = [
+            {
+              name: 'The Situation Dump',
+              template: '"Here\'s my situation: [describe everything]. What do I need to know?"',
+              why: 'Start messy. Claude handles complexity better than most people.',
+            },
+            {
+              name: 'The Translator',
+              template: '"Explain [medical term / discharge note / doctor\'s statement] in plain language. Then tell me what it means for daily caregiving."',
+              why: 'Bridge the gap between clinical language and lived reality.',
+            },
+            {
+              name: 'The Prep Coach',
+              template: '"I have [X minutes] with [specialist]. My biggest concerns are [A, B, C]. Give me the 5 most important questions to ask."',
+              why: 'Never leave a doctor\'s appointment wishing you\'d asked something.',
+            },
+            {
+              name: 'The Reality Check',
+              template: '"I\'m feeling [emotion] and thinking [thought]. Is this a normal part of stroke caregiving? Help me understand why."',
+              why: 'Normalize what you\'re experiencing. The shame and isolation lift when you realize what you feel is human.',
+            },
+            {
+              name: 'The Draft Partner',
+              template: '"Help me write [message/email/letter] to [person]. Goal: [outcome]. I\'m worried about: [concern]."',
+              why: 'Get the right words for conversations that matter — with family, doctors, employers, insurance.',
+            },
+          ];
+          return (
+            <div style={{ maxWidth: 960, margin: '0 auto', padding: '56px 24px 80px' }}>
+              {/* Header */}
+              <div style={{ marginBottom: 56 }}>
+                <div style={{ fontSize: 11, letterSpacing: '0.22em', color: accent, textTransform: 'uppercase', marginBottom: 14 }}>{tc.tag}</div>
+                <h1 style={{ ...serif, fontSize: 'clamp(22px,4vw,44px)', fontWeight: 400, margin: '0 0 16px' }}>
+                  {tc.h1}<br /><em style={{ color: accent }}>{tc.h2}</em>
+                </h1>
+                <p style={{ color: '#6A7A8A', lineHeight: 1.85, maxWidth: 620, fontSize: 15, fontWeight: 300 }}>{tc.sub}</p>
+              </div>
 
-        {/* ── BUILD WITH PURPOSE ── */}
-        {section === 'builder' && (
-          <div style={{ maxWidth: 960, margin: '0 auto', padding: '56px 24px 80px' }}>
-            <div style={{ marginBottom: 52 }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.22em', color: '#D9A84E', textTransform: 'uppercase', marginBottom: 14 }}>{t.builder.tag}</div>
-              <h1 style={{ ...serif, fontSize: 'clamp(22px,4vw,42px)', fontWeight: 400, margin: '0 0 14px' }}>
-                {t.builder.h1}<br /><em style={{ color: '#D9A84E' }}>{t.builder.h2}</em>
-              </h1>
-              <p style={{ color: '#6A7A8A', lineHeight: 1.8, maxWidth: 620, fontSize: 15, fontWeight: 300 }}>{t.builder.sub}</p>
-            </div>
-            <div style={{ background: 'rgba(217,168,78,0.08)', border: '1px solid rgba(217,168,78,0.25)', borderRadius: 14, padding: '22px 26px', marginBottom: 36 }}>
-              <div style={{ fontSize: 11, color: '#D9A84E', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>{t.builder.crossTag}</div>
-              <p style={{ fontSize: 15, color: '#B8A898', lineHeight: 1.8, margin: 0 }}
-                dangerouslySetInnerHTML={{ __html: t.builder.crossText }} />
-            </div>
-            {builderProjects.map((p, i) => (
-              <div key={i} style={{ marginBottom: 12 }}>
-                <div onClick={() => setExpandedProject(expandedProject === i ? null : i)} style={{
-                  padding: '22px 24px', borderRadius: 14, cursor: 'pointer',
-                  background: expandedProject === i ? `${p.color}0e` : 'rgba(255,255,255,0.025)',
-                  border: `1px solid ${expandedProject === i ? p.color + '50' : 'rgba(255,255,255,0.07)'}`,
-                  transition: 'all 0.2s'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    <div style={{ width: 4, alignSelf: 'stretch', background: p.color, borderRadius: 2, flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ marginBottom: 6 }}>{tag(p.phase, p.color)}</div>
-                      <h3 style={{ ...serif, fontSize: 18, fontWeight: 600, color: '#E0D8D0', margin: '6px 0 8px' }}>{p.title}</h3>
-                      <p style={{ fontSize: 13.5, color: '#7A8A9A', lineHeight: 1.7, margin: 0 }}>{p.desc}</p>
-                      {expandedProject === i && (
-                        <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${p.color}28` }}>
-                          <div style={{ fontSize: 12, color: p.color, marginBottom: 10, fontWeight: 600, letterSpacing: '0.06em' }}>{t.builder.whyPath}</div>
-                          <p style={{ fontSize: 13.5, color: '#8A9AAA', lineHeight: 1.8, margin: '0 0 20px' }}>{p.why}</p>
-                          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                            <div style={{ flex: '1 1 200px' }}>
-                              <div style={{ fontSize: 11, color: '#3A4A5A', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>{t.builder.skillsTag}</div>
-                              {p.skills.map(s => (
-                                <div key={s} style={{ fontSize: 13, color: '#5A7A6A', marginBottom: 6, display: 'flex', gap: 8 }}>
-                                  <span style={{ color: p.color }}>◆</span>{s}
-                                </div>
-                              ))}
-                            </div>
-                            <div style={{ flex: '1 1 200px' }}>
-                              <div style={{ fontSize: 11, color: '#3A4A5A', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>{t.builder.stepsTag}</div>
-                              {p.steps.map((s, j) => (
-                                <div key={j} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-                                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: `${p.color}25`, border: `1px solid ${p.color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: p.color, flexShrink: 0 }}>{j + 1}</div>
-                                  <div style={{ fontSize: 12, color: '#5A6A7A', lineHeight: 1.6 }}>{s}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+              {/* The gap callout */}
+              <div style={{ background: `${accent}10`, border: `1px solid ${accent}30`, borderRadius: 14, padding: '22px 28px', marginBottom: 56 }}>
+                <p style={{ ...serif, fontSize: 16, color: '#C8C0B8', lineHeight: 1.8, margin: 0, fontStyle: 'italic' }}>
+                  "The gap isn't access to Claude. It's not knowing what's possible to ask."
+                </p>
+                <p style={{ fontSize: 13, color: '#5A6A7A', margin: '12px 0 0' }}>This page closes that gap.</p>
+              </div>
+
+              {/* Use cases */}
+              <div style={{ fontSize: 11, letterSpacing: '0.22em', color: '#7A8A9A', textTransform: 'uppercase', marginBottom: 24 }}>{tc.useCasesTag}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginBottom: 72 }}>
+                {useCases.map((u, i) => (
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${u.color}28`, borderRadius: 14, padding: '22px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <span style={{ fontSize: 22 }}>{u.icon}</span>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: u.color }}>{u.title}</div>
                     </div>
-                    <div style={{ color: '#2A3A4A', fontSize: 18, flexShrink: 0 }}>{expandedProject === i ? '↑' : '↓'}</div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: 8, padding: '12px 14px', marginBottom: 12, borderLeft: `2px solid ${u.color}60` }}>
+                      <div style={{ fontSize: 10, color: '#3A4A5A', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6 }}>{tc.tryPrompt}</div>
+                      <p style={{ fontSize: 12.5, color: '#9AA8B0', lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>{u.prompt}</p>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: '#5A6A7A', lineHeight: 1.65, margin: 0 }}>{u.why}</p>
                   </div>
+                ))}
+              </div>
+
+              {/* Prompt patterns */}
+              <div style={{ fontSize: 11, letterSpacing: '0.22em', color: '#7A8A9A', textTransform: 'uppercase', marginBottom: 14 }}>{tc.patternsTag}</div>
+              <p style={{ fontSize: 14, color: '#6A7A8A', lineHeight: 1.8, marginBottom: 32, maxWidth: 620 }}>{tc.patternsIntro}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 64 }}>
+                {patterns.map((p, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 16, padding: '20px 22px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(200,147,74,0.15)', borderRadius: 12 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${accent}20`, border: `1px solid ${accent}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: accent, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#D0C8C0', marginBottom: 6 }}>{p.name}</div>
+                      <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: '8px 12px', marginBottom: 8, borderLeft: `2px solid ${accent}50` }}>
+                        <p style={{ fontSize: 12.5, color: '#8A9AAA', lineHeight: 1.65, margin: 0, fontStyle: 'italic' }}>{p.template}</p>
+                      </div>
+                      <p style={{ fontSize: 12.5, color: '#4A5A6A', lineHeight: 1.6, margin: 0 }}>{p.why}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div style={{ background: `${accent}0C`, border: `1px solid ${accent}35`, borderRadius: 16, padding: '36px 32px' }}>
+                <div style={{ fontSize: 11, color: accent, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 14 }}>{tc.ctaTag}</div>
+                <p style={{ fontSize: 15, color: '#C0B8B0', lineHeight: 1.8, margin: '0 0 28px', maxWidth: 560 }}>{tc.ctaText}</p>
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                  <a href="https://claude.ai" target="_blank" rel="noreferrer" style={{
+                    display: 'inline-block', background: accent, color: '#100806',
+                    padding: '11px 24px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+                    fontFamily: 'inherit', textDecoration: 'none', letterSpacing: '0.02em'
+                  }}>{tc.openClaude}</a>
+                  <a href="https://www.anthropic.com/claude" target="_blank" rel="noreferrer" style={{
+                    display: 'inline-block', background: 'transparent', color: accent,
+                    border: `1px solid ${accent}50`, padding: '11px 24px', borderRadius: 8,
+                    fontSize: 14, fontFamily: 'inherit', textDecoration: 'none'
+                  }}>{tc.learnClaude}</a>
                 </div>
               </div>
-            ))}
-            <div style={{ marginTop: 48, padding: '28px 32px', background: 'rgba(91,179,138,0.07)', border: '1px solid rgba(91,179,138,0.22)', borderRadius: 14 }}>
-              <div style={{ fontSize: 11, color: '#5BBD8A', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 12 }}>{t.builder.bigTag}</div>
-              <p style={{ fontSize: 15, color: '#B0C0B8', lineHeight: 1.8, margin: '0 0 12px' }}>{t.builder.bigText}</p>
-              <p style={{ fontSize: 13, color: '#4A7A6A', margin: 0 }}>{t.builder.bigSub}</p>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── LOCAL RESOURCES ── */}
         {section === 'resources' && (
