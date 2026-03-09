@@ -7,6 +7,15 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { REGIONS } from './data.js';
 
+function classifyVertex(x, y, z) {
+  if (y < -0.30 && z < -0.10) return 'cerebellum';
+  if (Math.abs(x) > 0.62)     return 'temporal';
+  if (z < -0.60 && y > -0.30) return 'occipital';
+  if (z > 0.32)               return 'frontal';
+  if (y > 0.50)               return 'parietal';
+  return 'limbic';
+}
+
 export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint }) {
   const mountRef = useRef(null);
   const stRef = useRef({
@@ -16,6 +25,7 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
   });
   const meshMapRef = useRef({});
   const highlightLightRef = useRef(null);
+  const updateColorsRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -67,36 +77,76 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
 
     let disposed = false;
 
-    // Load OBJ brain model
-    const texture = new THREE.TextureLoader().load('/brain.jpg');
-    const brainMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      specular: new THREE.Color(0x222222),
-      shininess: 18,
-    });
-
+    // Load OBJ brain model with vertex colors
     const loader = new OBJLoader();
     loader.load('/brain.obj', (obj) => {
       if (disposed) return;
-      // Center and scale the model
+
       const box = new THREE.Box3().setFromObject(obj);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = 3.2 / maxDim;
+      const cx = center.x, cy = center.y, cz = center.z;
 
-      obj.position.sub(center.multiplyScalar(scale));
       obj.scale.setScalar(scale);
+      obj.position.set(-cx * scale, -cy * scale, -cz * scale);
+
+      const BASE = new THREE.Color(0xCFB5A0);
+      const brainMeshes = [];
+      const regionVerts = {};
+      REGIONS.forEach(r => { regionVerts[r.id] = []; });
 
       obj.traverse(child => {
-        if (child.isMesh) {
-          child.material = brainMat;
-          child.castShadow = true;
-          child.receiveShadow = true;
+        if (!child.isMesh) return;
+        const mi = brainMeshes.length;
+        brainMeshes.push(child);
+        child.material = new THREE.MeshPhongMaterial({ vertexColors: true, specular: 0x333333, shininess: 20 });
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        const pos = child.geometry.attributes.position;
+        const N = pos.count;
+        const col = new Float32Array(N * 3);
+        for (let i = 0; i < N; i++) {
+          const wx = scale * (pos.getX(i) - cx);
+          const wy = scale * (pos.getY(i) - cy);
+          const wz = scale * (pos.getZ(i) - cz);
+          const rid = classifyVertex(wx, wy, wz);
+          if (regionVerts[rid]) regionVerts[rid].push({ m: mi, i });
+          col[i*3] = BASE.r; col[i*3+1] = BASE.g; col[i*3+2] = BASE.b;
         }
+        child.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
       });
 
       group.add(obj);
+
+      const DIM = new THREE.Color(0x352820);
+
+      const updateColors = (sel, hov) => {
+        const reset = sel ? DIM : BASE;
+        brainMeshes.forEach(mesh => {
+          const c = mesh.geometry.attributes.color.array;
+          for (let i = 0; i < c.length / 3; i++) {
+            c[i*3] = reset.r; c[i*3+1] = reset.g; c[i*3+2] = reset.b;
+          }
+          mesh.material.transparent = !!sel;
+          mesh.material.opacity = sel ? 0.5 : 1.0;
+        });
+        const activeId = sel || hov;
+        if (activeId) {
+          const reg = REGIONS.find(r => r.id === activeId);
+          const paint = new THREE.Color(sel ? reg.bright : reg.color);
+          (regionVerts[activeId] || []).forEach(({ m, i }) => {
+            const c = brainMeshes[m].geometry.attributes.color.array;
+            c[i*3] = paint.r; c[i*3+1] = paint.g; c[i*3+2] = paint.b;
+          });
+        }
+        brainMeshes.forEach(m => { m.geometry.attributes.color.needsUpdate = true; });
+      };
+
+      updateColorsRef.current = updateColors;
+      updateColors(null, null);
     });
 
     // Invisible region spheres for raycasting only
@@ -219,20 +269,15 @@ export default function BrainCanvas({ selected, hovered, onSelect, onHover, hint
   }, []);
 
   useEffect(() => {
+    if (updateColorsRef.current) updateColorsRef.current(selected, hovered);
     const light = highlightLightRef.current;
     if (!light) return;
     if (selected) {
       const reg = REGIONS.find(r => r.id === selected);
-      light.color.set(reg.bright);
-      light.intensity = 1.6;
-      light.position.set(...reg.pos);
-      light.distance = 2.8;
+      light.color.set(reg.bright); light.intensity = 1.0; light.position.set(...reg.pos); light.distance = 2.5;
     } else if (hovered) {
       const reg = REGIONS.find(r => r.id === hovered);
-      light.color.set(reg.color);
-      light.intensity = 0.8;
-      light.position.set(...reg.pos);
-      light.distance = 2.5;
+      light.color.set(reg.color); light.intensity = 0.4; light.position.set(...reg.pos); light.distance = 2.2;
     } else {
       light.intensity = 0;
     }
