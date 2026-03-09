@@ -433,6 +433,77 @@ export default function App() {
                 ))}
               </div>
 
+              {/* Learning ladder */}
+              <div style={{ marginBottom: 64 }}>
+                <div style={{ fontSize: 11, letterSpacing: '0.22em', color: '#7A8A9A', textTransform: 'uppercase', marginBottom: 10 }}>Your learning path</div>
+                <p style={{ fontSize: 14, color: '#6A7A8A', lineHeight: 1.8, marginBottom: 32, maxWidth: 560 }}>
+                  No course required. No tech background needed. Just three steps, taken at whatever pace fits your life.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {[
+                    {
+                      step: '1',
+                      time: '2 minutes',
+                      title: 'Your first conversation',
+                      desc: 'Go to claude.ai and paste this into the chat:',
+                      prompt: '"My [family member] had a stroke [X weeks/months] ago. The hardest thing right now is [describe one thing]. What should I know?"',
+                      note: "That's it. You've started. Claude will ask follow-up questions. Just answer honestly.",
+                      link: 'https://claude.ai',
+                      linkLabel: 'Open Claude now →',
+                      color: '#5BBD8A',
+                      connector: true,
+                    },
+                    {
+                      step: '2',
+                      time: '10 minutes',
+                      title: 'Understand what Claude can actually do',
+                      desc: "Anthropic's beginner overview explains Claude's capabilities in plain language — no jargon, no sign-up required to read.",
+                      prompt: null,
+                      note: 'Focus on the "How to use Claude" section. Skim everything else.',
+                      link: 'https://www.anthropic.com/claude',
+                      linkLabel: 'Read the overview →',
+                      color: '#5B8DD9',
+                      connector: true,
+                    },
+                    {
+                      step: '3',
+                      time: 'Self-paced · free to audit',
+                      title: 'AI for Everyone — when you\'re ready',
+                      desc: 'Created by AI educator Andrew Ng, this course is designed for non-technical people who want to genuinely understand how AI works and how to use it confidently.',
+                      prompt: null,
+                      note: 'No math, no code. Caregivers who\'ve taken it say it made them feel like they finally understood what they were working with.',
+                      link: 'https://www.coursera.org/learn/ai-for-everyone',
+                      linkLabel: 'View the free course →',
+                      color: '#C8934A',
+                      connector: false,
+                    },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 0 }}>
+                      {/* Left: step + connector line */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 20, flexShrink: 0 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${item.color}20`, border: `2px solid ${item.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: item.color, flexShrink: 0 }}>{item.step}</div>
+                        {item.connector && <div style={{ width: 2, flex: 1, background: `linear-gradient(to bottom, ${item.color}40, transparent)`, minHeight: 24, marginTop: 4 }} />}
+                      </div>
+                      {/* Right: content */}
+                      <div style={{ paddingBottom: item.connector ? 36 : 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, marginTop: 6 }}>
+                          <div style={{ fontSize: 15, fontWeight: 600, color: '#E0D8D0' }}>{item.title}</div>
+                          <div style={{ fontSize: 11, color: item.color, letterSpacing: '0.08em' }}>{item.time}</div>
+                        </div>
+                        <p style={{ fontSize: 13.5, color: '#6A7A8A', lineHeight: 1.75, margin: '0 0 10px' }}>{item.desc}</p>
+                        {item.prompt && (
+                          <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: 8, padding: '12px 14px', marginBottom: 10, borderLeft: `2px solid ${item.color}60` }}>
+                            <p style={{ fontSize: 12.5, color: '#9AA8B0', lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>{item.prompt}</p>
+                          </div>
+                        )}
+                        <p style={{ fontSize: 12.5, color: '#4A5A6A', lineHeight: 1.65, margin: '0 0 12px' }}>{item.note}</p>
+                        <a href={item.link} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: item.color, textDecoration: 'none', fontWeight: 500 }}>{item.linkLabel}</a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* CTA */}
               <div style={{ background: `${accent}0C`, border: `1px solid ${accent}35`, borderRadius: 16, padding: '36px 32px' }}>
                 <div style={{ fontSize: 11, color: accent, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 14 }}>{tc.ctaTag}</div>
