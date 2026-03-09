@@ -1,0 +1,198 @@
+import { useState, useEffect } from 'react';
+
+function detectLang() {
+  const langs = [navigator.language, ...(navigator.languages || [])];
+  const isKoreanLang = langs.some(l => l.toLowerCase().startsWith('ko'));
+  const isKoreanTZ = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Seoul';
+  return (isKoreanLang || isKoreanTZ) ? 'ko' : 'en';
+}
+
+export function useLang() {
+  const [lang, setLang] = useState(() => localStorage.getItem('sf_lang') || detectLang());
+  useEffect(() => { localStorage.setItem('sf_lang', lang); }, [lang]);
+  return [lang, setLang];
+}
+
+export const T = {
+  en: {
+    langToggle: '한국어',
+    nav: { brand: 'StrokeFamily', home: 'Home', brain: 'Brain Atlas', heroes: 'Voices of Hope', wellbeing: 'Caregiver Wellbeing', iot: 'Smart Home Tech', builder: 'Build with Purpose', resources: 'Local Resources', community: 'Community' },
+    home: {
+      location: 'Wauwatosa, Wisconsin',
+      h1: 'When stroke changes someone you love,',
+      h2: 'understanding the brain changes everything',
+      sub: 'The behaviors that look careless or selfish — dirty plates, bathroom messes, apparent indifference — are almost never choices. They are symptoms of physical brain damage. This site helps families understand why, find local support, and use technology to rebuild quality of life.',
+      btnBrain: 'Brain Atlas', btnHeroes: 'Voices of Hope', btnIot: 'Smart Home Tech',
+      cards: [
+        { icon: '🧠', title: 'Understand the Neuroscience', desc: '6 interactive brain regions explain which functions are damaged — and why the resulting behaviors are symptoms, not choices.', action: 'Explore Brain Atlas →', target: 'brain', color: '#E8735A' },
+        { icon: '📚', title: 'Learn from Those Who Lived It', desc: 'Authors, survivors, and families who walked this road share what they learned and how they found their way to new connection.', action: 'Read their stories →', target: 'heroes', color: '#5B8DD9' },
+        { icon: '🔌', title: 'Technology That Directly Helps', desc: 'Fall detection, bathroom monitoring, smart lighting, activity patterns — real IoT solutions that reduce caregiver burden.', action: 'Explore Smart Home →', target: 'iot', color: '#5BBD8A' },
+      ],
+      stats: [['795,000', 'strokes/year in the US'], ['7M+', 'Americans living with stroke effects'], ['~3M', 'family caregivers affected'], ['60%', 'of care is invisible to the medical system']],
+    },
+    brain: {
+      tag: 'Interactive 3D', title: 'Brain Atlas',
+      sub: "Click any colored region to understand what that part of the brain does — and exactly what its damage explains about your loved one's behavior.",
+      back: '← All regions', familyImpact: 'Family Impact',
+      hint: '↻ drag to rotate · click a region to explore',
+    },
+    heroes: {
+      tag: 'Voices of Hope',
+      h1: 'People who walked this road', h2: '— and what they learned',
+      sub: 'These authors, survivors, and family members turned their most difficult experiences into gifts for others. Their books and words are companions for the long road of caregiving.',
+      learnMore: 'Learn more →',
+      startTag: 'Where to start',
+      startText: 'If you read only one book, read <strong>My Stroke of Insight</strong> by Jill Bolte Taylor. It will transform how you see your loved one. Then read <strong>Identity Theft</strong> by Debra Meyerson — for the family\'s journey.',
+    },
+    wellbeing: {
+      tag: 'Caregiver Wellbeing',
+      h1: 'Skills that', h2: 'transform the caregiver',
+      sub: 'These are the inner technologies — just as real as any smart home device — that rebuild resilience, reduce burnout, and make it possible to show up day after day.',
+      why: 'Why it matters: ', how: 'How to start: ',
+      truthTag: 'The most important truth',
+      truthText: '"You cannot pour from an empty vessel. Caring for yourself is not selfish — it is the foundation of sustainable caregiving. Your wellbeing <em>is</em> their wellbeing."',
+    },
+    iot: {
+      tag: 'Smart Home Technology',
+      h1: 'IoT tools that', h2: 'directly reduce caregiver burden',
+      sub: "These technologies don't just add convenience — they fill the gaps that no human caregiver can cover alone.",
+      familyImpact: 'Family Impact', hardwareNeeded: 'Hardware Needed',
+      firstTag: 'The single highest-impact first step',
+      firstText: 'Start with the <strong>Bathroom Occupancy Monitor</strong> and <strong>Night Lighting System</strong>. Together, these address the two most dangerous risk scenarios at a hardware cost of under $40 DIY, or under $200 commercial.',
+    },
+    builder: {
+      tag: 'Build with Purpose',
+      h1: 'How an IoT learner can', h2: "directly improve this family's life",
+      sub: "If you're learning embedded systems, ESP32, sensors, and smart farming — you already have most of the skills needed to build real assistive technology.",
+      crossTag: 'The Crossover',
+      crossText: 'Smart farming and assistive care share nearly identical hardware stacks: <strong>ESP32, environmental sensors (DHT22, MQ135, PIR), MQTT, Raspberry Pi dashboards, wireless comms.</strong> The skills you\'re building for plant monitoring and irrigation control map almost perfectly to fall detection, occupancy monitoring, and caregiver dashboards.',
+      whyPath: 'Why this matters for your path',
+      skillsTag: "Skills you'll practice", stepsTag: 'Build steps',
+      bigTag: 'The bigger picture',
+      bigText: "Every sensor system you build for this family becomes a template. Document it, open-source it. Other stroke families face identical problems with identical hardware. Your vision of technology serving human flourishing starts here, in one family's bathroom, with an ESP32 and a PIR sensor.",
+      bigSub: 'Therapeutic garden → plant monitoring → stroke recovery environment monitoring. The thread is unbroken.',
+    },
+    resources: {
+      tag: 'Wauwatosa, WI', title: 'Local Resources',
+      sub: "Milwaukee County has strong support systems. You don't have to navigate this alone.",
+      firstCallTag: 'First call to make',
+      adrcName: 'Milwaukee County ADRC', adrcPhone: '(414) 289-6874',
+      adrcDesc: 'Free assessment, no income requirement. Coordinates in-home care, Family Care eligibility, caregiver support, and benefits navigation in one call.',
+      adrcAddr: '1220 W. Vliet St., Milwaukee · county.milwaukee.gov/EN/ADRC',
+      items: [
+        { t: 'Froedtert Neuroscience Center', s: '8701 Watertown Plank Rd — right in Wauwatosa', a: 'Ask for neuropsychological evaluation + OT for ADLs', c: '#E8735A' },
+        { t: 'Wisconsin Family Care / IRIS Program', s: 'State-funded in-home aide visits for eligible stroke survivors', a: 'ADRC can check eligibility — may significantly reduce family burden', c: '#5BBD8A' },
+        { t: 'Milwaukee County Caregiver Coalition', s: 'Local support groups for families in exactly this situation', a: 'In-person and virtual groups available', c: '#D9A84E' },
+        { t: 'NAMI Wisconsin', s: 'nami.org — for family members carrying the emotional weight', a: 'Counseling, support groups, and crisis navigation', c: '#D96F8A' },
+        { t: 'American Stroke Association', s: 'strokeassociation.org — nationwide community for stroke families', a: 'Caregiver forums, local group finder, educational materials', c: '#9B6FD9' },
+      ],
+    },
+    community: {
+      tag: 'Community',
+      h1: "You don't have to carry this", h2: 'alone',
+      sub: 'The grief, the exhaustion, the anger-then-guilt — other families know exactly what this is.',
+      features: [['💬', 'Share Stories', 'Talk with families who truly get it', '#5B8DD9'], ['🤝', 'Peer Matching', 'Connect 1:1 with similar situations', '#E8735A'], ['📖', 'Learn Together', 'Resources & local provider reviews', '#5BBD8A'], ['🧘', 'Caregiver Space', 'Your wellbeing matters too', '#D96F8A']],
+      platforms: [
+        { p: 'American Stroke Association Caregiver Community', l: 'https://www.strokeassociation.org', d: 'The largest online space for stroke families. Real stories, real advice, from people who have lived exactly this.', c: '#E8735A' },
+        { p: 'Milwaukee County ADRC Caregiver Groups', l: 'https://county.milwaukee.gov/EN/ADRC', d: 'In-person and virtual groups near Wauwatosa. Call (414) 289-6874 to find a group this week.', c: '#5BBD8A' },
+        { p: 'NAMI Wisconsin Family Support Groups', l: 'https://www.nami.org/Support-Education/Support-Groups', d: 'Free, peer-led groups for families navigating neurological and mental health challenges.', c: '#9B6FD9' },
+        { p: 'Stroke Onward Community', l: 'https://strokeonward.org', d: 'Founded by Debra Meyerson. Focused on the emotional and identity journey of stroke families.', c: '#5B8DD9' },
+      ],
+      visit: 'Visit →',
+      quote: '"The grief of watching someone change is real.\nThe exhaustion is real. Getting help is not giving up."',
+      quoteAttr: '— Common experience among stroke family caregivers',
+    },
+    footer: 'Educational resource for stroke families in Wauwatosa / Milwaukee. Always consult medical professionals for individual care decisions.',
+  },
+
+  ko: {
+    langToggle: 'English',
+    nav: { brand: 'StrokeFamily', home: '홈', brain: '뇌 지도', heroes: '희망의 목소리', wellbeing: '간병인 웰빙', iot: '스마트 홈 기술', builder: '목적 있는 제작', resources: '지역 자원', community: '커뮤니티' },
+    home: {
+      location: 'Wauwatosa, Wisconsin',
+      h1: '뇌졸중이 사랑하는 사람을 바꿀 때,',
+      h2: '뇌를 이해하는 것이 모든 것을 바꿉니다',
+      sub: '부주의하거나 이기적으로 보이는 행동들 — 더러운 그릇, 화장실 지저분함, 명백한 무관심 — 은 거의 선택이 아닙니다. 이것들은 물리적 뇌 손상의 증상입니다. 이 사이트는 가족들이 그 이유를 이해하고, 지역 지원을 찾고, 기술을 활용하여 삶의 질을 회복하도록 돕습니다.',
+      btnBrain: '뇌 지도', btnHeroes: '희망의 목소리', btnIot: '스마트 홈 기술',
+      cards: [
+        { icon: '🧠', title: '신경과학 이해하기', desc: '6개의 인터랙티브 뇌 영역이 어떤 기능이 손상되었는지, 그리고 결과적인 행동이 왜 증상이지 선택이 아닌지 설명합니다.', action: '뇌 지도 탐색 →', target: 'brain', color: '#E8735A' },
+        { icon: '📚', title: '경험자로부터 배우기', desc: '이 길을 걸은 저자들, 생존자들, 가족들이 배운 것과 새로운 연결로 가는 길을 어떻게 찾았는지 공유합니다.', action: '그들의 이야기 읽기 →', target: 'heroes', color: '#5B8DD9' },
+        { icon: '🔌', title: '직접 도움이 되는 기술', desc: '낙상 감지, 화장실 모니터링, 스마트 조명, 활동 패턴 — 간병 부담을 줄이는 실제 IoT 솔루션.', action: '스마트 홈 탐색 →', target: 'iot', color: '#5BBD8A' },
+      ],
+      stats: [['795,000', '미국의 연간 뇌졸중 발생 건수'], ['7M+', '뇌졸중 후유증으로 생활하는 미국인'], ['~3M', '영향받는 가족 간병인'], ['60%', '의료 시스템에 보이지 않는 돌봄']],
+    },
+    brain: {
+      tag: '인터랙티브 3D', title: '뇌 지도',
+      sub: '색칠된 영역을 클릭하여 뇌의 그 부분이 무엇을 하는지, 그리고 그 손상이 사랑하는 분의 행동에 대해 정확히 무엇을 설명하는지 이해하세요.',
+      back: '← 전체 영역', familyImpact: '가족에게 미치는 영향',
+      hint: '↻ 드래그하여 회전 · 영역을 클릭하여 탐색',
+    },
+    heroes: {
+      tag: '희망의 목소리',
+      h1: '이 길을 걸은 사람들', h2: '— 그리고 그들이 배운 것',
+      sub: '이 저자들, 생존자들, 가족 구성원들은 가장 어려운 경험을 타인을 위한 선물로 바꾸었습니다. 그들의 책과 말은 긴 간병의 길에 동반자입니다.',
+      learnMore: '자세히 알아보기 →',
+      startTag: '시작하는 곳',
+      startText: '한 권만 읽는다면 Jill Bolte Taylor의 <strong>뇌과학자의 뇌졸중 회고</strong>를 읽으세요. 사랑하는 사람을 보는 방식을 변화시킬 것입니다. 그다음 Debra Meyerson의 <strong>정체성 도둑</strong>을 읽으세요 — 가족의 여정을 위해.',
+    },
+    wellbeing: {
+      tag: '간병인 웰빙',
+      h1: '간병인을', h2: '변화시키는 기술들',
+      sub: '이것들은 내면의 기술들입니다 — 스마트 홈 기기만큼 실재하는 — 회복력을 재건하고, 번아웃을 줄이며, 날마다 나타날 수 있게 합니다.',
+      why: '중요한 이유: ', how: '시작하는 방법: ',
+      truthTag: '가장 중요한 진실',
+      truthText: '"빈 그릇에서는 부을 수 없습니다. 자신을 돌보는 것은 이기적인 것이 아닙니다 — 그것은 지속 가능한 간병의 기초입니다. 당신의 웰빙이 바로 그분의 웰빙입니다."',
+    },
+    iot: {
+      tag: '스마트 홈 기술',
+      h1: '간병 부담을', h2: '직접 줄이는 IoT 도구들',
+      sub: '이 기술들은 단순히 편의성을 추가하는 것이 아닙니다 — 어떤 인간 간병인도 혼자서 감당할 수 없는 공백을 메웁니다.',
+      familyImpact: '가족에게 미치는 영향', hardwareNeeded: '필요한 하드웨어',
+      firstTag: '가장 큰 영향을 주는 첫 번째 단계',
+      firstText: '<strong>화장실 재실 모니터</strong>와 <strong>야간 조명 시스템</strong>으로 시작하세요. 이 두 가지를 함께 사용하면 DIY 40달러 미만, 또는 상용 200달러 미만의 비용으로 가장 위험한 두 가지 상황을 해결합니다.',
+    },
+    builder: {
+      tag: '목적 있는 제작',
+      h1: 'IoT 학습자가', h2: '이 가족의 삶을 직접 개선할 수 있는 방법',
+      sub: '임베디드 시스템, ESP32, 센서, 스마트 팜을 배우고 있다면 — 이미 실제 보조 기술을 만드는 데 필요한 대부분의 기술을 갖추고 있습니다.',
+      crossTag: '접점',
+      crossText: '스마트 팜과 보조 돌봄은 거의 동일한 하드웨어 스택을 공유합니다: <strong>ESP32, 환경 센서 (DHT22, MQ135, PIR), MQTT, 라즈베리파이 대시보드, 무선 통신.</strong> 식물 모니터링과 관개 제어를 위해 쌓고 있는 기술들은 낙상 감지, 재실 모니터링, 간병인 대시보드에 거의 완벽하게 적용됩니다.',
+      whyPath: '당신의 경로에 이것이 중요한 이유',
+      skillsTag: '연습할 기술들', stepsTag: '빌드 단계',
+      bigTag: '큰 그림',
+      bigText: '이 가족을 위해 만드는 모든 센서 시스템은 템플릿이 됩니다. 문서화하고, 오픈소스로 공개하세요. 다른 뇌졸중 가족들도 동일한 하드웨어로 동일한 문제에 직면합니다. 기술이 인간의 번영을 위해 봉사한다는 당신의 비전은 여기, 한 가족의 화장실에서, ESP32와 PIR 센서로 시작됩니다.',
+      bigSub: '치료 정원 → 식물 모니터링 → 뇌졸중 회복 환경 모니터링. 그 실은 끊어지지 않습니다.',
+    },
+    resources: {
+      tag: 'Wauwatosa, WI', title: '지역 자원',
+      sub: '밀워키 카운티에는 강력한 지원 시스템이 있습니다. 혼자 헤쳐나가지 않아도 됩니다.',
+      firstCallTag: '첫 번째로 할 전화',
+      adrcName: '밀워키 카운티 ADRC', adrcPhone: '(414) 289-6874',
+      adrcDesc: '무료 평가, 소득 요건 없음. 한 번의 전화로 방문 요양, Family Care 자격, 간병인 지원, 혜택 안내를 조정합니다.',
+      adrcAddr: '1220 W. Vliet St., Milwaukee · county.milwaukee.gov/EN/ADRC',
+      items: [
+        { t: 'Froedtert 신경과학 센터', s: '8701 Watertown Plank Rd — Wauwatosa 내', a: '신경심리 평가 + 일상생활 작업치료 요청', c: '#E8735A' },
+        { t: 'Wisconsin Family Care / IRIS 프로그램', s: '자격 있는 뇌졸중 생존자를 위한 주 지원 방문 요양', a: 'ADRC에서 자격 확인 가능 — 가족 부담을 크게 줄일 수 있음', c: '#5BBD8A' },
+        { t: '밀워키 카운티 간병인 연합', s: '정확히 이런 상황의 가족을 위한 지역 지원 그룹', a: '대면 및 온라인 그룹 이용 가능', c: '#D9A84E' },
+        { t: 'NAMI Wisconsin', s: 'nami.org — 감정적 부담을 지고 있는 가족 구성원을 위해', a: '상담, 지원 그룹, 위기 안내', c: '#D96F8A' },
+        { t: '미국 뇌졸중 협회', s: 'strokeassociation.org — 뇌졸중 가족을 위한 전국 커뮤니티', a: '간병인 포럼, 지역 그룹 찾기, 교육 자료', c: '#9B6FD9' },
+      ],
+    },
+    community: {
+      tag: '커뮤니티',
+      h1: '이것을 혼자', h2: '감당하지 않아도 됩니다',
+      sub: '슬픔, 탈진, 분노 후 죄책감 — 다른 가족들은 이것이 정확히 무엇인지 알고 있습니다.',
+      features: [['💬', '이야기 나누기', '진정으로 이해하는 가족들과 이야기하세요', '#5B8DD9'], ['🤝', '동료 매칭', '비슷한 상황의 사람과 1:1로 연결', '#E8735A'], ['📖', '함께 배우기', '자원 및 지역 제공자 리뷰', '#5BBD8A'], ['🧘', '간병인 공간', '당신의 웰빙도 중요합니다', '#D96F8A']],
+      platforms: [
+        { p: '미국 뇌졸중 협회 간병인 커뮤니티', l: 'https://www.strokeassociation.org', d: '뇌졸중 가족을 위한 가장 큰 온라인 공간. 정확히 이것을 경험한 사람들의 실제 이야기와 실제 조언.', c: '#E8735A' },
+        { p: '밀워키 카운티 ADRC 간병인 그룹', l: 'https://county.milwaukee.gov/EN/ADRC', d: 'Wauwatosa 근처의 대면 및 온라인 그룹. (414) 289-6874로 전화하여 이번 주 그룹을 찾으세요.', c: '#5BBD8A' },
+        { p: 'NAMI Wisconsin 가족 지원 그룹', l: 'https://www.nami.org/Support-Education/Support-Groups', d: '신경학적 및 정신 건강 문제를 헤쳐나가는 가족을 위한 무료 동료 주도 그룹.', c: '#9B6FD9' },
+        { p: 'Stroke Onward 커뮤니티', l: 'https://strokeonward.org', d: 'Debra Meyerson이 설립. 뇌졸중 가족의 감정 및 정체성 여정에 집중.', c: '#5B8DD9' },
+      ],
+      visit: '방문하기 →',
+      quote: '"누군가가 변해가는 것을 보는 슬픔은 실재합니다.\n탈진은 실재합니다. 도움을 받는 것은 포기가 아닙니다."',
+      quoteAttr: '— 뇌졸중 가족 간병인들의 공통 경험',
+    },
+    footer: '와우와토사/밀워키 뇌졸중 가족을 위한 교육 자료입니다. 개인 치료 결정은 항상 의료 전문가와 상담하세요.',
+  },
+};
